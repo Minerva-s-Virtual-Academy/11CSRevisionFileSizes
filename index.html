@@ -1,0 +1,1864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>File Size Expression Builder — Binary Storage Theory</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono for crystal-clear numbers -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Verdana', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            calm: {
+              bg: '#F8FAFC',
+              card: '#FFFFFF',
+              border: '#E2E8F0',
+              text: '#1E293B',
+              muted: '#475569'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Calm, accessible custom utilities */
+    body {
+      font-family: 'Inter', 'Verdana', system-ui, sans-serif;
+      line-height: 1.6;
+      letter-spacing: 0.01em;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Smooth subtle transitions without jarring flashes */
+    .smooth-card {
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background-color 0.18s ease;
+    }
+
+    .token-pill {
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .token-pill:hover:not(:disabled) {
+      transform: translateY(-2px);
+    }
+
+    .token-pill:active:not(:disabled) {
+      transform: translateY(0px);
+    }
+
+    /* Dropzone highlight state */
+    .dropzone-active {
+      border-style: solid !important;
+      transform: scale(1.01);
+    }
+
+    /* Custom scrollbar for clean iframe embedding */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    .dark ::-webkit-scrollbar-thumb {
+      background: #334155;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen transition-colors duration-200">
+
+  <!-- Main Container optimised for Canvas LMS iframe (100% width, comfortable max-width) -->
+  <div id="app" class="w-full max-w-5xl mx-auto px-3 sm:px-6 py-4 sm:py-6 flex flex-col gap-5">
+
+    <!-- Top Navigation & Accessibility Controls -->
+    <header class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div class="flex items-start sm:items-center gap-3">
+        <div class="w-11 h-11 rounded-xl bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300 flex items-center justify-center shrink-0 font-bold text-xl border border-sky-200 dark:border-sky-800">
+          ∑
+        </div>
+        <div>
+          <h1 class="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+            File Size Expression Builder
+          </h1>
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+            Phrase bitmap &amp; sound storage calculations in <span class="font-semibold text-sky-700 dark:text-sky-300">KiB</span> &amp; <span class="font-semibold text-indigo-700 dark:text-indigo-300">MiB</span> — no mental maths needed.
+          </p>
+        </div>
+      </div>
+
+      <!-- Utility Buttons: Theory Drawer & Calm Dark/Light Theme -->
+      <div class="flex flex-wrap items-center gap-2">
+        <button id="toggle-theory-btn" onclick="toggleTheoryDrawer()"
+          class="px-3.5 py-2 rounded-xl text-sm font-semibold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 dark:text-amber-200 dark:border-amber-800/80 flex items-center gap-2 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+          <span>Storage Theory Guide</span>
+        </button>
+
+        <button id="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle colour theme"
+          class="p-2.5 rounded-xl text-sm font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition">
+          <span id="theme-icon">🌙</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Collapsible Storage Theory Reference Drawer (Always accessible without losing progress) -->
+    <section id="theory-drawer" class="hidden bg-white dark:bg-slate-900 border-2 border-amber-200 dark:border-amber-800/70 rounded-2xl p-5 shadow-md">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 mb-4">
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-0.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-200">Reference Card</span>
+          <h2 class="font-bold text-base sm:text-lg text-slate-900 dark:text-white">How Binary File Size Fractions Work</h2>
+        </div>
+        <button onclick="toggleTheoryDrawer()" class="text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white px-2.5 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+          Close ✕
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+        <!-- Card 1: Bitmap Images -->
+        <div class="rounded-xl p-4 bg-sky-50/70 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800/60">
+          <div class="font-bold text-sky-900 dark:text-sky-200 mb-1.5 flex items-center gap-1.5">
+            <span>🖼️</span> 1. Bitmap Images (Numerator)
+          </div>
+          <p class="text-slate-700 dark:text-slate-300 text-xs mb-2">
+            Every pixel stores a binary colour code. Total bits = total pixels × bits per pixel:
+          </p>
+          <div class="font-mono text-xs bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-sky-200 dark:border-sky-800 text-sky-800 dark:text-sky-300">
+            Width × Height × Colour Depth
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-400 mt-2">
+            <strong>Watch out:</strong> If given <em>number of colours</em> (e.g. 16 colours), find the power of 2: <span class="font-mono">2⁴ = 16</span> → <strong>4 bits</strong>.
+          </p>
+        </div>
+
+        <!-- Card 2: Digital Sound -->
+        <div class="rounded-xl p-4 bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/60">
+          <div class="font-bold text-indigo-900 dark:text-indigo-200 mb-1.5 flex items-center gap-1.5">
+            <span>🔊</span> 2. Digital Sound (Numerator)
+          </div>
+          <p class="text-slate-700 dark:text-slate-300 text-xs mb-2">
+            Sound waves are sampled every second. Multiply samples per second by bits per sample and total seconds:
+          </p>
+          <div class="font-mono text-xs bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-indigo-200 dark:border-indigo-800 text-indigo-800 dark:text-indigo-300">
+            Sample Rate × Resolution × Seconds × Channels
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-400 mt-2">
+            <strong>Watch out:</strong> Convert minutes to seconds (<span class="font-mono">× 60</span>). Mono = <span class="font-mono">1</span> channel, Stereo = <span class="font-mono">2</span> channels.
+          </p>
+        </div>
+
+        <!-- Card 3: Binary Units -->
+        <div class="rounded-xl p-4 bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60">
+          <div class="font-bold text-amber-900 dark:text-amber-200 mb-1.5 flex items-center gap-1.5">
+            <span>🪜</span> 3. Binary Units (Denominator)
+          </div>
+          <p class="text-slate-700 dark:text-slate-300 text-xs mb-2">
+            The numerator gives <strong>Bits</strong>. Divide on the bottom line to scale up using binary IEC units (1024):
+          </p>
+          <ul class="font-mono text-xs space-y-1.5 bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200">
+            <li>• To <strong>Bytes</strong>: ÷ <span class="font-bold">8</span></li>
+            <li>• To <strong>KiB</strong>: ÷ <span class="font-bold">8 × 1024</span></li>
+            <li>• To <strong>MiB</strong>: ÷ <span class="font-bold">8 × 1024 × 1024</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mode Switcher: Explorer Sandbox vs 4-Stage Scaffolded Practice -->
+    <nav aria-label="Learning stages" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-2 shadow-sm">
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+        <button onclick="switchMode('explorer')" id="tab-explorer"
+          class="stage-tab px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-left sm:text-center transition flex flex-col sm:items-center justify-center border">
+          <span class="text-[11px] uppercase tracking-wider opacity-75">Step 0 • Concept</span>
+          <span>🔬 Theory Explorer</span>
+        </button>
+
+        <button onclick="switchMode('stage', 1)" id="tab-stage-1"
+          class="stage-tab px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-left sm:text-center transition flex flex-col sm:items-center justify-center border">
+          <span class="text-[11px] uppercase tracking-wider opacity-75">Stage 1 • Full Guide</span>
+          <span>🧩 Labelled Slots</span>
+        </button>
+
+        <button onclick="switchMode('stage', 2)" id="tab-stage-2"
+          class="stage-tab px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-left sm:text-center transition flex flex-col sm:items-center justify-center border">
+          <span class="text-[11px] uppercase tracking-wider opacity-75">Stage 2 • Guided</span>
+          <span>🏗️ Unlabelled Slots</span>
+        </button>
+
+        <button onclick="switchMode('stage', 3)" id="tab-stage-3"
+          class="stage-tab px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-left sm:text-center transition flex flex-col sm:items-center justify-center border">
+          <span class="text-[11px] uppercase tracking-wider opacity-75">Stage 3 • Faded</span>
+          <span>⚖️ Open Fraction</span>
+        </button>
+
+        <button onclick="switchMode('stage', 4)" id="tab-stage-4"
+          class="stage-tab col-span-2 sm:col-span-1 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-left sm:text-center transition flex flex-col sm:items-center justify-center border">
+          <span class="text-[11px] uppercase tracking-wider opacity-75">Stage 4 • Independent</span>
+          <span>🎓 Exam Mastery</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 1: INTERACTIVE STORAGE THEORY EXPLORER (CONCEPTUAL SANDBOX)      -->
+    <!-- ===================================================================== -->
+    <main id="explorer-view" class="space-y-5">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200 dark:border-slate-800">
+          <div>
+            <span class="inline-block px-2.5 py-0.5 rounded-md text-xs font-bold bg-sky-100 text-sky-800 dark:bg-sky-900/60 dark:text-sky-200 mb-1">
+              Interactive Visual Sandbox
+            </span>
+            <h2 class="text-lg font-bold text-slate-900 dark:text-white">See How a File Size Fraction is Built</h2>
+            <p class="text-sm text-slate-600 dark:text-slate-400">Adjust the media properties below and watch how the numerator (total bits) and denominator (unit conversion) change.</p>
+          </div>
+
+          <!-- Media Type Switch -->
+          <div class="inline-flex rounded-xl bg-slate-100 dark:bg-slate-800 p-1 border border-slate-200 dark:border-slate-700 self-start">
+            <button id="exp-type-image" onclick="setExplorerType('image')"
+              class="px-3.5 py-1.5 rounded-lg text-sm font-semibold transition bg-white dark:bg-slate-900 text-sky-700 dark:text-sky-300 shadow-sm">
+              🖼️ Bitmap Image
+            </button>
+            <button id="exp-type-sound" onclick="setExplorerType('sound')"
+              class="px-3.5 py-1.5 rounded-lg text-sm font-semibold transition text-slate-600 dark:text-slate-400">
+              🔊 Digital Sound
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-5">
+          <!-- Left Controls -->
+          <div class="lg:col-span-5 space-y-4">
+            <!-- Image Controls -->
+            <div id="exp-controls-image" class="space-y-4">
+              <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                <div class="flex justify-between text-sm font-semibold mb-1">
+                  <label for="exp-width">Image Width (pixels)</label>
+                  <span id="exp-width-val" class="font-mono text-sky-700 dark:text-sky-300">800 px</span>
+                </div>
+                <input id="exp-width" type="range" min="100" max="4000" step="100" value="800" oninput="updateExplorer()"
+                  class="w-full accent-sky-600 cursor-pointer">
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                <div class="flex justify-between text-sm font-semibold mb-1">
+                  <label for="exp-height">Image Height (pixels)</label>
+                  <span id="exp-height-val" class="font-mono text-sky-700 dark:text-sky-300">600 px</span>
+                </div>
+                <input id="exp-height" type="range" min="100" max="3000" step="100" value="600" oninput="updateExplorer()"
+                  class="w-full accent-sky-600 cursor-pointer">
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                <label class="block text-sm font-semibold mb-2">Colour Depth (bits per pixel)</label>
+                <div class="grid grid-cols-4 gap-2">
+                  <button onclick="setExpDepth(1)" data-depth="1" class="exp-depth-btn py-2 rounded-lg font-mono text-xs font-bold border">1-bit<br><span class="font-sans font-normal opacity-75">2 cols</span></button>
+                  <button onclick="setExpDepth(4)" data-depth="4" class="exp-depth-btn py-2 rounded-lg font-mono text-xs font-bold border">4-bit<br><span class="font-sans font-normal opacity-75">16 cols</span></button>
+                  <button onclick="setExpDepth(8)" data-depth="8" class="exp-depth-btn py-2 rounded-lg font-mono text-xs font-bold border">8-bit<br><span class="font-sans font-normal opacity-75">256 cols</span></button>
+                  <button onclick="setExpDepth(24)" data-depth="24" class="exp-depth-btn py-2 rounded-lg font-mono text-xs font-bold border">24-bit<br><span class="font-sans font-normal opacity-75">True Col</span></button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sound Controls -->
+            <div id="exp-controls-sound" class="hidden space-y-4">
+              <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                <label class="block text-sm font-semibold mb-2">Sample Rate (samples per second)</label>
+                <div class="grid grid-cols-3 gap-2">
+                  <button onclick="setExpRate(8000)" data-rate="8000" class="exp-rate-btn py-2 rounded-lg font-mono text-xs font-bold border">8,000 Hz<br><span class="font-sans font-normal opacity-75">Phone</span></button>
+                  <button onclick="setExpRate(44100)" data-rate="44100" class="exp-rate-btn py-2 rounded-lg font-mono text-xs font-bold border">44,100 Hz<br><span class="font-sans font-normal opacity-75">CD Audio</span></button>
+                  <button onclick="setExpRate(48000)" data-rate="48000" class="exp-rate-btn py-2 rounded-lg font-mono text-xs font-bold border">48,000 Hz<br><span class="font-sans font-normal opacity-75">Studio</span></button>
+                </div>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                <label class="block text-sm font-semibold mb-2">Sample Resolution (bit depth)</label>
+                <div class="grid grid-cols-3 gap-2">
+                  <button onclick="setExpRes(8)" data-res="8" class="exp-res-btn py-2 rounded-lg font-mono text-xs font-bold border">8 bits</button>
+                  <button onclick="setExpRes(16)" data-res="16" class="exp-res-btn py-2 rounded-lg font-mono text-xs font-bold border">16 bits</button>
+                  <button onclick="setExpRes(24)" data-res="24" class="exp-res-btn py-2 rounded-lg font-mono text-xs font-bold border">24 bits</button>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                  <div class="flex justify-between text-xs font-semibold mb-1">
+                    <label for="exp-duration">Duration</label>
+                    <span id="exp-dur-val" class="font-mono text-indigo-700 dark:text-indigo-300">30 s</span>
+                  </div>
+                  <input id="exp-duration" type="range" min="10" max="180" step="10" value="30" oninput="updateExplorer()"
+                    class="w-full accent-indigo-600 cursor-pointer">
+                </div>
+
+                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                  <label class="block text-xs font-semibold mb-1.5">Channels</label>
+                  <div class="grid grid-cols-2 gap-1.5">
+                    <button onclick="setExpChannels(1)" data-ch="1" class="exp-ch-btn py-1.5 rounded-lg text-xs font-bold border">Mono (1)</button>
+                    <button onclick="setExpChannels(2)" data-ch="2" class="exp-ch-btn py-1.5 rounded-lg text-xs font-bold border">Stereo (2)</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Target Unit Selector -->
+            <div class="p-3.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60">
+              <label class="block text-sm font-semibold text-amber-900 dark:text-amber-200 mb-2">Target Output Unit (Denominator)</label>
+              <div class="grid grid-cols-3 gap-2">
+                <button onclick="setExpUnit('Bytes')" data-unit="Bytes" class="exp-unit-btn py-2 rounded-lg text-xs font-bold border">Bytes (B)</button>
+                <button onclick="setExpUnit('KiB')" data-unit="KiB" class="exp-unit-btn py-2 rounded-lg text-xs font-bold border">Kibibytes (KiB)</button>
+                <button onclick="setExpUnit('MiB')" data-unit="MiB" class="exp-unit-btn py-2 rounded-lg text-xs font-bold border">Mebibytes (MiB)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Live Fraction Visualiser -->
+          <div class="lg:col-span-7 flex flex-col justify-between bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-5">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Live Calculation Phrase</span>
+                <span id="exp-theory-tag" class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800 dark:bg-sky-900/60 dark:text-sky-200">
+                  Total Pixels × Bits per Pixel
+                </span>
+              </div>
+
+              <!-- Visual Fraction Box -->
+              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-5 my-2 shadow-inner">
+                <!-- Numerator -->
+                <div class="text-center">
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 mb-2">
+                    Numerator = Total Number of Bits
+                  </div>
+                  <div id="exp-numerator-pills" class="flex flex-wrap items-center justify-center gap-2">
+                    <!-- Populated by JS -->
+                  </div>
+                </div>
+
+                <!-- Fraction Bar -->
+                <div class="my-4 flex items-center gap-3">
+                  <div class="h-0.5 flex-1 bg-slate-800 dark:bg-slate-300 rounded-full"></div>
+                  <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">divided by</span>
+                  <div class="h-0.5 flex-1 bg-slate-800 dark:bg-slate-300 rounded-full"></div>
+                </div>
+
+                <!-- Denominator -->
+                <div class="text-center">
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-2">
+                    Denominator = Binary Unit Conversion
+                  </div>
+                  <div id="exp-denominator-pills" class="flex flex-wrap items-center justify-center gap-2">
+                    <!-- Populated by JS -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Plain English Explanation -->
+              <div id="exp-explanation" class="mt-4 p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm text-slate-700 dark:text-slate-300">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+
+            <!-- Live Result + CTA to Stage 1 -->
+            <div class="mt-5 pt-4 border-t border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <span class="text-xs text-slate-500 dark:text-slate-400 block">If evaluated by a calculator:</span>
+                <span id="exp-result-value" class="font-mono text-lg font-bold text-emerald-700 dark:text-emerald-400">1,406.25 KiB</span>
+              </div>
+              <button onclick="switchMode('stage', 1)"
+                class="px-5 py-2.5 rounded-xl font-semibold text-sm bg-sky-600 hover:bg-sky-700 text-white shadow-sm transition flex items-center justify-center gap-2">
+                <span>Start Stage 1 Practice</span>
+                <span>→</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 2: 4-STAGE SCAFFOLDED PRACTICE WORKSPACE                         -->
+    <!-- ===================================================================== -->
+    <main id="practice-view" class="hidden space-y-5">
+
+      <!-- Stage Header & Progress Bar -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="stage-badge" class="px-2.5 py-0.5 rounded-md text-xs font-bold bg-sky-100 text-sky-800 dark:bg-sky-900/60 dark:text-sky-200">
+                Stage 1 of 4
+              </span>
+              <h2 id="stage-title" class="font-bold text-base sm:text-lg text-slate-900 dark:text-white">
+                Full Scaffolding: Labelled Slots
+              </h2>
+            </div>
+            <p id="stage-desc" class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
+              Each slot tells you what part of the formula belongs there. Click or drag tokens to build the fraction.
+            </p>
+          </div>
+
+          <!-- Question Dots -->
+          <div class="flex items-center gap-2 self-start sm:self-center">
+            <span class="text-xs font-medium text-slate-500 dark:text-slate-400 mr-1">Question:</span>
+            <div id="question-dots" class="flex items-center gap-1.5">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Subtle Progress Bar -->
+        <div class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+          <div id="overall-progress-bar" class="h-full bg-emerald-500 transition-all duration-300 rounded-full" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Scenario Prompt Card -->
+      <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div class="flex items-center gap-2">
+            <span id="q-media-badge" class="px-3 py-1 rounded-lg text-xs font-bold bg-sky-100 text-sky-800 dark:bg-sky-900/60 dark:text-sky-200">
+              🖼️ Bitmap Image
+            </span>
+            <span id="q-unit-badge" class="px-3 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-200">
+              Target: Kibibytes (KiB)
+            </span>
+          </div>
+
+          <!-- Progressive Nudge Button -->
+          <button id="nudge-btn" onclick="triggerNudge()"
+            class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 dark:bg-purple-950/50 dark:hover:bg-purple-900/50 dark:text-purple-200 dark:border-purple-800 transition flex items-center gap-1.5">
+            <span>💡</span>
+            <span id="nudge-btn-label">Need a Nudge? (0/3)</span>
+          </button>
+        </div>
+
+        <!-- Question Text -->
+        <p id="q-prompt" class="text-base sm:text-lg font-medium text-slate-900 dark:text-white leading-relaxed">
+          <!-- Populated by JS -->
+        </p>
+
+        <!-- Progressive Hint Box (Hidden until requested) -->
+        <div id="nudge-box" class="hidden mt-4 p-3.5 rounded-xl bg-purple-50/80 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/80 text-sm text-purple-950 dark:text-purple-100 space-y-1.5">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- Expression Builder Workspace -->
+      <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5">
+
+        <!-- Stage 4 Mode Toggle: Token Builder vs Free-Text Typing -->
+        <div id="stage4-input-toggle" class="hidden flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
+          <span class="text-xs font-semibold text-slate-600 dark:text-slate-400">
+            Choose how you want to phrase your answer:
+          </span>
+          <div class="inline-flex rounded-xl bg-slate-100 dark:bg-slate-800 p-1 border border-slate-200 dark:border-slate-700 self-start">
+            <button id="btn-input-tokens" onclick="setStage4InputMode('tokens')"
+              class="px-3 py-1 rounded-lg text-xs font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm">
+              🧱 Token Builder
+            </button>
+            <button id="btn-input-text" onclick="setStage4InputMode('text')"
+              class="px-3 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400">
+              ⌨️ Type Expression
+            </button>
+          </div>
+        </div>
+
+        <!-- Visual Fraction Builder (Stages 1-3 & Stage 4 Token Mode) -->
+        <div id="fraction-builder-container" class="space-y-4">
+          <!-- Numerator Zone -->
+          <div id="numerator-zone"
+            ondragover="handleDragOver(event, 'num')"
+            ondragleave="handleDragLeave(event, 'num')"
+            ondrop="handleDrop(event, 'num')"
+            class="rounded-2xl p-4 bg-sky-50/60 dark:bg-sky-950/25 border-2 border-dashed border-sky-300 dark:border-sky-800 transition">
+            <div class="flex items-center justify-between mb-2.5">
+              <span class="text-xs font-bold uppercase tracking-wider text-sky-800 dark:text-sky-300 flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+                Numerator (Top): Total Bits
+              </span>
+              <span id="num-hint-tag" class="text-xs text-sky-700 dark:text-sky-400 font-medium">
+                Multiply media values together
+              </span>
+            </div>
+
+            <div id="numerator-slots" class="min-h-[64px] flex flex-wrap items-center justify-center gap-2.5">
+              <!-- Slots or open tokens rendered here -->
+            </div>
+          </div>
+
+          <!-- Division Line -->
+          <div class="flex items-center gap-4 px-2">
+            <div class="h-1 flex-1 bg-slate-800 dark:bg-slate-300 rounded-full"></div>
+            <span class="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-bold uppercase tracking-widest text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
+              ÷ Divided By
+            </span>
+            <div class="h-1 flex-1 bg-slate-800 dark:bg-slate-300 rounded-full"></div>
+          </div>
+
+          <!-- Denominator Zone -->
+          <div id="denominator-zone"
+            ondragover="handleDragOver(event, 'den')"
+            ondragleave="handleDragLeave(event, 'den')"
+            ondrop="handleDrop(event, 'den')"
+            class="rounded-2xl p-4 bg-amber-50/60 dark:bg-amber-950/25 border-2 border-dashed border-amber-300 dark:border-amber-800 transition">
+            <div class="flex items-center justify-between mb-2.5">
+              <span class="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                Denominator (Bottom): Unit Conversions
+              </span>
+              <span id="den-hint-tag" class="text-xs text-amber-700 dark:text-amber-400 font-medium">
+                Divide to convert bits → target unit
+              </span>
+            </div>
+
+            <div id="denominator-slots" class="min-h-[64px] flex flex-wrap items-center justify-center gap-2.5">
+              <!-- Slots or open tokens rendered here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Stage 4 Free-Text Expression Input (Hidden unless selected in Stage 4) -->
+        <div id="freetext-builder-container" class="hidden space-y-3">
+          <label for="freetext-input" class="block text-sm font-semibold text-slate-800 dark:text-slate-200">
+            Write the full calculation expression:
+          </label>
+          <input id="freetext-input" type="text" autocomplete="off" spellcheck="false"
+            placeholder="e.g. (1920 * 1080 * 24) / (8 * 1024 * 1024)"
+            onkeydown="if(event.key==='Enter') checkAnswer()"
+            class="w-full px-4 py-3.5 rounded-xl font-mono text-base bg-slate-50 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 focus:border-sky-500 focus:outline-none text-slate-900 dark:text-white">
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            Tip: You can use <code class="font-mono bg-slate-100 dark:bg-slate-800 px-1 rounded">*</code> or <code class="font-mono bg-slate-100 dark:bg-slate-800 px-1 rounded">x</code> for multiply, and brackets around your numerator and denominator, e.g. <code class="font-mono">(A * B * C) / (8 * 1024)</code>.
+          </p>
+        </div>
+
+        <!-- Word Bank / Token Tray -->
+        <div id="token-bank-section" class="pt-3 border-t border-slate-200 dark:border-slate-800">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              Available Values &amp; Constants
+            </span>
+            <span class="text-xs text-slate-500 dark:text-slate-400">
+              Click a token to place it (or drag into Top / Bottom)
+            </span>
+          </div>
+
+          <div id="token-bank" class="flex flex-wrap gap-2.5">
+            <!-- Token buttons populated by JS -->
+          </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+          <button onclick="resetCurrentQuestion()"
+            class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition">
+            ↺ Clear Expression
+          </button>
+
+          <div class="flex items-center gap-3">
+            <button id="check-btn" onclick="checkAnswer()"
+              class="px-6 py-2.5 rounded-xl text-sm font-bold bg-sky-600 hover:bg-sky-700 text-white shadow-sm transition">
+              Check Expression ✓
+            </button>
+
+            <button id="next-btn" onclick="nextQuestion()"
+              class="hidden px-6 py-2.5 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition flex items-center gap-2">
+              <span id="next-btn-text">Next Question</span>
+              <span>→</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Diagnostic Feedback Panel -->
+        <div id="feedback-panel" class="hidden rounded-2xl p-4 sm:p-5 border text-sm space-y-2">
+          <!-- Populated dynamically on check -->
+        </div>
+
+      </section>
+    </main>
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 3: COMPLETION / MASTERY SUMMARY CARD                             -->
+    <!-- ===================================================================== -->
+    <section id="completion-view" class="hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 text-center shadow-sm space-y-5">
+      <div class="w-16 h-16 rounded-2xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 mx-auto flex items-center justify-center text-3xl border border-emerald-200 dark:border-emerald-800">
+        🌟
+      </div>
+      <div class="max-w-xl mx-auto space-y-2">
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white">All 4 Stages Complete!</h2>
+        <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400">
+          You progressed from guided labelled slots all the way to independent file size expressions in Kibibytes and Mebibytes.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto text-left">
+        <div class="p-4 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800">
+          <div class="text-xs font-bold uppercase text-sky-700 dark:text-sky-300">Bitmap Images</div>
+          <div class="font-mono text-xs mt-1 text-slate-800 dark:text-slate-200">Width × Height × Colour Depth</div>
+        </div>
+        <div class="p-4 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800">
+          <div class="text-xs font-bold uppercase text-indigo-700 dark:text-indigo-300">Digital Sound</div>
+          <div class="font-mono text-xs mt-1 text-slate-800 dark:text-slate-200">Rate × Res × Seconds × Channels</div>
+        </div>
+        <div class="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+          <div class="text-xs font-bold uppercase text-amber-700 dark:text-amber-300">Binary Units</div>
+          <div class="font-mono text-xs mt-1 text-slate-800 dark:text-slate-200">÷ 8 (B) → ÷ 1024 (KiB) → ÷ 1024 (MiB)</div>
+        </div>
+      </div>
+
+      <div class="pt-2 flex flex-wrap justify-center gap-3">
+        <button onclick="restartAll()"
+          class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition">
+          ↺ Practice Again from Stage 1
+        </button>
+        <button onclick="switchMode('stage', 4)"
+          class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-sky-600 hover:bg-sky-700 text-white transition">
+          🎓 Replay Stage 4 Exam Mastery
+        </button>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- APPLICATION LOGIC & SCAFFOLDED QUESTION BANK                            -->
+  <!-- ======================================================================= -->
+  <script>
+    /**
+     * 1. CURRICULUM QUESTION BANK (12 Questions across 4 Progressive Stages)
+     * Each question defines:
+     * - stage: 1..4
+     * - mediaType: 'image' | 'sound'
+     * - targetUnit: 'KiB' | 'MiB'
+     * - prompt: Clear, structured problem statement
+     * - numExpected: Array of numeric values required in the numerator (order-independent)
+     * - denExpected: Array of numeric values required in the denominator (order-independent)
+     * - numSlots: Metadata for Stage 1 (labelled) & Stage 2 (unlabelled slots)
+     * - denSlots: Metadata for Stage 1 (labelled) & Stage 2 (unlabelled slots)
+     * - tokens: Word bank items { id, value, label, sublabel, isDistractor, distractorReason }
+     * - nudges: 3 progressive hints (1: Theory rule, 2: Spotting traps/values, 3: Auto-fill 1 piece)
+     */
+    const QUESTIONS = [
+      // ==================== STAGE 1: FULL SCAFFOLDING ====================
+      {
+        id: 's1-q1',
+        stage: 1,
+        mediaType: 'image',
+        targetUnit: 'KiB',
+        prompt: 'A small bitmap icon is <strong>400 pixels wide</strong> by <strong>300 pixels high</strong> with a colour depth of <strong>8 bits</strong>. Build the expression to find its file size in <strong>Kibibytes (KiB)</strong>.',
+        numExpected: [400, 300, 8],
+        denExpected: [8, 1024],
+        numSlots: [
+          { label: 'Width (px)', expected: 400 },
+          { label: 'Height (px)', expected: 300 },
+          { label: 'Colour Depth (bits)', expected: 8 }
+        ],
+        denSlots: [
+          { label: 'Bits → Bytes (8)', expected: 8 },
+          { label: 'Bytes → KiB (1024)', expected: 1024 }
+        ],
+        tokens: [
+          { id: 't1', value: 400, label: '400', sublabel: 'Width (px)' },
+          { id: 't2', value: 300, label: '300', sublabel: 'Height (px)' },
+          { id: 't3', value: 8, label: '8', sublabel: '8-bit depth' },
+          { id: 't4', value: 8, label: '8', sublabel: '8 bits/byte' },
+          { id: 't5', value: 1024, label: '1024', sublabel: 'Binary KiB' },
+          { id: 't6', value: 1000, label: '1000', sublabel: 'Decimal KB', isDistractor: true, distractorReason: '1000 is for decimal Kilobytes (KB). Binary Kibibytes (KiB) use 1024.' }
+        ],
+        nudges: [
+          '<strong>Storage Theory:</strong> For a bitmap image, multiply <em>Width × Height × Colour Depth</em> on top to get total bits.',
+          '<strong>Unit Conversion:</strong> To go from Bits to Kibibytes (KiB), divide by <strong>8</strong> (for Bytes) and then by <strong>1024</strong> (for KiB).',
+          '<strong>Auto-fill:</strong> Let’s place one value for you to get started!'
+        ]
+      },
+      {
+        id: 's1-q2',
+        stage: 1,
+        mediaType: 'sound',
+        targetUnit: 'KiB',
+        prompt: 'A <strong>mono</strong> voice note is recorded for <strong>20 seconds</strong> at a sample rate of <strong>8,000 Hz</strong> and a sample resolution of <strong>16 bits</strong>. Phrase the calculation in <strong>Kibibytes (KiB)</strong>.',
+        numExpected: [8000, 16, 20],
+        denExpected: [8, 1024],
+        numSlots: [
+          { label: 'Sample Rate (Hz)', expected: 8000 },
+          { label: 'Resolution (bits)', expected: 16 },
+          { label: 'Duration (secs)', expected: 20 }
+        ],
+        denSlots: [
+          { label: 'Bits → Bytes (8)', expected: 8 },
+          { label: 'Bytes → KiB (1024)', expected: 1024 }
+        ],
+        tokens: [
+          { id: 't1', value: 8000, label: '8000', sublabel: 'Sample rate' },
+          { id: 't2', value: 16, label: '16', sublabel: 'Bit resolution' },
+          { id: 't3', value: 20, label: '20', sublabel: 'Seconds' },
+          { id: 't4', value: 8, label: '8', sublabel: 'Bits in a Byte' },
+          { id: 't5', value: 1024, label: '1024', sublabel: 'Bytes in a KiB' },
+          { id: 't6', value: 2, label: '2', sublabel: 'Stereo channels', isDistractor: true, distractorReason: 'The question states this is a mono recording (1 channel), not stereo (2).' }
+        ],
+        nudges: [
+          '<strong>Storage Theory:</strong> Sound bits = <em>Sample Rate × Sample Resolution × Duration (seconds)</em>. (Mono is × 1).',
+          '<strong>Denominator Check:</strong> Since we want Kibibytes (KiB), divide by <strong>8 × 1024</strong> on the bottom.',
+          '<strong>Auto-fill:</strong> Let’s place one value into the fraction for you.'
+        ]
+      },
+      {
+        id: 's1-q3',
+        stage: 1,
+        mediaType: 'image',
+        targetUnit: 'MiB',
+        prompt: 'A high-resolution wallpaper measures <strong>1920 × 1080 pixels</strong> and uses <strong>24-bit</strong> true colour. Phrase the calculation to find its size in <strong>Mebibytes (MiB)</strong>.',
+        numExpected: [1920, 1080, 24],
+        denExpected: [8, 1024, 1024],
+        numSlots: [
+          { label: 'Width (px)', expected: 1920 },
+          { label: 'Height (px)', expected: 1080 },
+          { label: 'Colour Depth (bits)', expected: 24 }
+        ],
+        denSlots: [
+          { label: 'Bits → Bytes (8)', expected: 8 },
+          { label: 'Bytes → KiB (1024)', expected: 1024 },
+          { label: 'KiB → MiB (1024)', expected: 1024 }
+        ],
+        tokens: [
+          { id: 't1', value: 1920, label: '1920', sublabel: 'Width' },
+          { id: 't2', value: 1080, label: '1080', sublabel: 'Height' },
+          { id: 't3', value: 24, label: '24', sublabel: 'Colour depth' },
+          { id: 't4', value: 8, label: '8', sublabel: 'Bits → Bytes' },
+          { id: 't5', value: 1024, label: '1024', sublabel: 'Bytes → KiB' },
+          { id: 't6', value: 1024, label: '1024', sublabel: 'KiB → MiB' }
+        ],
+        nudges: [
+          '<strong>Storage Theory:</strong> Mebibytes (MiB) is one step higher up the binary ladder than Kibibytes (KiB).',
+          '<strong>Denominator Check:</strong> Divide by <strong>8</strong> (Bytes), then <strong>1024</strong> (KiB), then <strong>1024</strong> again (MiB).',
+          '<strong>Auto-fill:</strong> Let’s place one value into the fraction for you.'
+        ]
+      },
+
+      // ==================== STAGE 2: MEDIUM SCAFFOLDING ====================
+      {
+        id: 's2-q1',
+        stage: 2,
+        mediaType: 'image',
+        targetUnit: 'KiB',
+        prompt: 'A retro game sprite is <strong>128 pixels wide</strong> by <strong>128 pixels high</strong> and uses a palette of <strong>16 colours</strong>. Phrase the file size calculation in <strong>Kibibytes (KiB)</strong>.',
+        numExpected: [128, 128, 4],
+        denExpected: [8, 1024],
+        numSlots: [
+          { label: 'Term 1', expected: 128 },
+          { label: 'Term 2', expected: 128 },
+          { label: 'Term 3', expected: 4 }
+        ],
+        denSlots: [
+          { label: 'Unit 1', expected: 8 },
+          { label: 'Unit 2', expected: 1024 }
+        ],
+        tokens: [
+          { id: 't1', value: 128, label: '128', sublabel: 'px' },
+          { id: 't2', value: 128, label: '128', sublabel: 'px' },
+          { id: 't3', value: 4, label: '4', sublabel: 'bits' },
+          { id: 't4', value: 16, label: '16', sublabel: 'colours', isDistractor: true, distractorReason: '16 is the number of colours, not the bit depth! Since 2⁴ = 16, each pixel needs 4 bits.' },
+          { id: 't5', value: 8, label: '8', sublabel: '' },
+          { id: 't6', value: 1024, label: '1024', sublabel: '' }
+        ],
+        nudges: [
+          '<strong>Watch the Colour Trap:</strong> We multiply by <em>bits per pixel</em>, not the number of colours.',
+          '<strong>Power of 2:</strong> How many bits are needed to represent 16 colours? <span class="font-mono">2 × 2 × 2 × 2 = 16</span>, so <strong>4 bits</strong>!',
+          '<strong>Auto-fill:</strong> Let’s place one value for you.'
+        ]
+      },
+      {
+        id: 's2-q2',
+        stage: 2,
+        mediaType: 'sound',
+        targetUnit: 'MiB',
+        prompt: 'A <strong>stereo</strong> music track lasts <strong>2 minutes</strong>. It is sampled at <strong>44,100 Hz</strong> with a <strong>16-bit</strong> resolution. Build the expression in <strong>Mebibytes (MiB)</strong>.',
+        numExpected: [44100, 16, 120, 2],
+        denExpected: [8, 1024, 1024],
+        numSlots: [
+          { label: 'Term 1', expected: 44100 },
+          { label: 'Term 2', expected: 16 },
+          { label: 'Term 3', expected: 120 },
+          { label: 'Term 4', expected: 2 }
+        ],
+        denSlots: [
+          { label: 'Unit 1', expected: 8 },
+          { label: 'Unit 2', expected: 1024 },
+          { label: 'Unit 3', expected: 1024 }
+        ],
+        tokens: [
+          { id: 't1', value: 44100, label: '44100', sublabel: 'Hz' },
+          { id: 't2', value: 16, label: '16', sublabel: 'bits' },
+          { id: 't3', value: 120, label: '120', sublabel: 'secs' },
+          { id: 't4', value: 2, label: '2', sublabel: 'stereo' },
+          { id: 't5', value: 2, label: '2', sublabel: 'mins', isDistractor: true, distractorReason: 'Sample rate is in Hertz (samples per second), so 2 minutes must be converted to 120 seconds!' },
+          { id: 't6', value: 8, label: '8', sublabel: '' },
+          { id: 't7', value: 1024, label: '1024', sublabel: '' },
+          { id: 't8', value: 1024, label: '1024', sublabel: '' }
+        ],
+        nudges: [
+          '<strong>Time &amp; Channels:</strong> Hertz means samples per <em>second</em>, and <em>stereo</em> means 2 audio channels.',
+          '<strong>Convert Minutes:</strong> 2 minutes = <span class="font-mono">2 × 60 = 120</span> seconds. Also remember to multiply by <strong>2</strong> for stereo.',
+          '<strong>Auto-fill:</strong> Let’s place one value into your expression.'
+        ]
+      },
+      {
+        id: 's2-q3',
+        stage: 2,
+        mediaType: 'image',
+        targetUnit: 'MiB',
+        prompt: 'A digital photo has a resolution of <strong>2000 × 1500 pixels</strong> with <strong>256 possible colours</strong> per pixel. Phrase the calculation in <strong>Mebibytes (MiB)</strong>.',
+        numExpected: [2000, 1500, 8],
+        denExpected: [8, 1024, 1024],
+        numSlots: [
+          { label: 'Term 1', expected: 2000 },
+          { label: 'Term 2', expected: 1500 },
+          { label: 'Term 3', expected: 8 }
+        ],
+        denSlots: [
+          { label: 'Unit 1', expected: 8 },
+          { label: 'Unit 2', expected: 1024 },
+          { label: 'Unit 3', expected: 1024 }
+        ],
+        tokens: [
+          { id: 't1', value: 2000, label: '2000', sublabel: '' },
+          { id: 't2', value: 1500, label: '1500', sublabel: '' },
+          { id: 't3', value: 8, label: '8', sublabel: 'bits' },
+          { id: 't4', value: 256, label: '256', sublabel: 'colours', isDistractor: true, distractorReason: '256 is the number of colours. Since 2⁸ = 256, the colour depth is 8 bits.' },
+          { id: 't5', value: 8, label: '8', sublabel: 'bits/byte' },
+          { id: 't6', value: 1024, label: '1024', sublabel: '' },
+          { id: 't7', value: 1024, label: '1024', sublabel: '' }
+        ],
+        nudges: [
+          '<strong>Colour Depth:</strong> 256 colours is standard 1-byte colour (<span class="font-mono">2⁸ = 256</span>), so each pixel takes <strong>8 bits</strong>.',
+          '<strong>MiB Denominator:</strong> Notice that you will have an <span class="font-mono">8</span> on top (colour depth) and an <span class="font-mono">8</span> on the bottom (bits → bytes)!',
+          '<strong>Auto-fill:</strong> Let’s place one value for you.'
+        ]
+      },
+
+      // ==================== STAGE 3: LOW SCAFFOLDING (OPEN TRAYS) ====================
+      {
+        id: 's3-q1',
+        stage: 3,
+        mediaType: 'sound',
+        targetUnit: 'KiB',
+        prompt: 'A <strong>mono</strong> podcast intro lasts <strong>45 seconds</strong>, recorded at <strong>16,000 Hz</strong> and <strong>8-bit</strong> sample resolution. Build the complete fraction in <strong>Kibibytes (KiB)</strong>.',
+        numExpected: [16000, 8, 45],
+        denExpected: [8, 1024],
+        tokens: [
+          { id: 't1', value: 16000, label: '16000', sublabel: '' },
+          { id: 't2', value: 8, label: '8', sublabel: '' },
+          { id: 't3', value: 45, label: '45', sublabel: '' },
+          { id: 't4', value: 8, label: '8', sublabel: '' },
+          { id: 't5', value: 1024, label: '1024', sublabel: '' },
+          { id: 't6', value: 1024, label: '1024', sublabel: '', isDistractor: true, distractorReason: 'Only divide by 1024 once for Kibibytes (KiB). Twice is for Mebibytes (MiB).' },
+          { id: 't7', value: 1000, label: '1000', sublabel: '', isDistractor: true, distractorReason: 'Use 1024 for binary Kibibytes (KiB), not 1000.' }
+        ],
+        nudges: [
+          '<strong>Open Builder:</strong> Decide which numbers belong in the Numerator (total bits) and which belong in the Denominator (unit conversion).',
+          '<strong>Check Units:</strong> The target is <strong>Kibibytes (KiB)</strong>, so you only need <span class="font-mono">8</span> and one <span class="font-mono">1024</span> on the bottom.',
+          '<strong>Auto-fill:</strong> Let’s place one token into the correct tray.'
+        ]
+      },
+      {
+        id: 's3-q2',
+        stage: 3,
+        mediaType: 'image',
+        targetUnit: 'KiB',
+        prompt: 'A monochrome scanner scans a document at <strong>600 × 800 pixels</strong> using <strong>black and white (2 colours)</strong>. Phrase the file size in <strong>Kibibytes (KiB)</strong>.',
+        numExpected: [600, 800, 1],
+        denExpected: [8, 1024],
+        tokens: [
+          { id: 't1', value: 600, label: '600', sublabel: '' },
+          { id: 't2', value: 800, label: '800', sublabel: '' },
+          { id: 't3', value: 1, label: '1', sublabel: '' },
+          { id: 't4', value: 2, label: '2', sublabel: '', isDistractor: true, distractorReason: '2 colours only needs 1 bit per pixel (0 = white, 1 = black), since 2¹ = 2.' },
+          { id: 't5', value: 8, label: '8', sublabel: '' },
+          { id: 't6', value: 1024, label: '1024', sublabel: '' },
+          { id: 't7', value: 1000, label: '1000', sublabel: '', isDistractor: true, distractorReason: 'Use 1024 for binary Kibibytes (KiB), not 1000.' }
+        ],
+        nudges: [
+          '<strong>Black &amp; White Bit Depth:</strong> 2 colours (0 or 1) requires just <strong>1 bit</strong> per pixel!',
+          '<strong>Structure:</strong> Top = <span class="font-mono">600 × 800 × 1</span>. Bottom = <span class="font-mono">8 × 1024</span>.',
+          '<strong>Auto-fill:</strong> Let’s place one token into the correct tray.'
+        ]
+      },
+      {
+        id: 's3-q3',
+        stage: 3,
+        mediaType: 'sound',
+        targetUnit: 'MiB',
+        prompt: 'A <strong>stereo</strong> studio recording runs for <strong>1 minute</strong> at <strong>48,000 Hz</strong> and <strong>24-bit</strong> resolution. Phrase the expression in <strong>Mebibytes (MiB)</strong>.',
+        numExpected: [48000, 24, 60, 2],
+        denExpected: [8, 1024, 1024],
+        tokens: [
+          { id: 't1', value: 48000, label: '48000', sublabel: '' },
+          { id: 't2', value: 24, label: '24', sublabel: '' },
+          { id: 't3', value: 60, label: '60', sublabel: '' },
+          { id: 't4', value: 2, label: '2', sublabel: '' },
+          { id: 't5', value: 1, label: '1', sublabel: '', isDistractor: true, distractorReason: '1 minute must be converted to 60 seconds to match the sample rate in Hz.' },
+          { id: 't6', value: 8, label: '8', sublabel: '' },
+          { id: 't7', value: 1024, label: '1024', sublabel: '' },
+          { id: 't8', value: 1024, label: '1024', sublabel: '' }
+        ],
+        nudges: [
+          '<strong>Checklist:</strong> Sample rate (48000) × Resolution (24) × Seconds (60) × Channels (2 for stereo).',
+          '<strong>Mebibytes:</strong> Divide on the bottom by <span class="font-mono">8 × 1024 × 1024</span>.',
+          '<strong>Auto-fill:</strong> Let’s place one token into the correct tray.'
+        ]
+      },
+
+      // ==================== STAGE 4: MASTERY / EXAM MODE ====================
+      {
+        id: 's4-q1',
+        stage: 4,
+        mediaType: 'image',
+        targetUnit: 'MiB',
+        prompt: 'A 4K display frame is <strong>3840 × 2160 pixels</strong> with a palette of <strong>65,536 colours (16-bit colour)</strong>. Phrase the uncompressed file size in <strong>Mebibytes (MiB)</strong>.',
+        numExpected: [3840, 2160, 16],
+        denExpected: [8, 1024, 1024],
+        tokens: [
+          { id: 't1', value: 3840, label: '3840', sublabel: '' },
+          { id: 't2', value: 2160, label: '2160', sublabel: '' },
+          { id: 't3', value: 16, label: '16', sublabel: '' },
+          { id: 't4', value: 65536, label: '65536', sublabel: '', isDistractor: true, distractorReason: '65,536 is the number of colours; use the bit depth (16 bits).' },
+          { id: 't5', value: 8, label: '8', sublabel: '' },
+          { id: 't6', value: 1024, label: '1024', sublabel: '' },
+          { id: 't7', value: 1024, label: '1024', sublabel: '' },
+          { id: 't8', value: 1000, label: '1000', sublabel: '', isDistractor: true, distractorReason: 'Use binary 1024 for MiB, not decimal 1000.' }
+        ],
+        nudges: [
+          '<strong>Exam Tip:</strong> Always separate <em>Total Bits</em> (numerator) from <em>Unit Conversions</em> (denominator).',
+          '<strong>Values:</strong> Top = <span class="font-mono">3840 × 2160 × 16</span>. Bottom = <span class="font-mono">8 × 1024 × 1024</span>.',
+          '<strong>Auto-fill:</strong> Let’s place one token for you.'
+        ]
+      },
+      {
+        id: 's4-q2',
+        stage: 4,
+        mediaType: 'sound',
+        targetUnit: 'MiB',
+        prompt: 'An audio book chapter in <strong>mono</strong> lasts <strong>5 minutes</strong> and is recorded at <strong>22,050 Hz</strong> with a <strong>16-bit</strong> sample resolution. Phrase the file size in <strong>Mebibytes (MiB)</strong>.',
+        numExpected: [22050, 16, 300],
+        denExpected: [8, 1024, 1024],
+        tokens: [
+          { id: 't1', value: 22050, label: '22050', sublabel: '' },
+          { id: 't2', value: 16, label: '16', sublabel: '' },
+          { id: 't3', value: 300, label: '300', sublabel: '' },
+          { id: 't4', value: 5, label: '5', sublabel: '', isDistractor: true, distractorReason: 'Convert 5 minutes into seconds: 5 × 60 = 300 seconds.' },
+          { id: 't5', value: 2, label: '2', sublabel: '', isDistractor: true, distractorReason: 'Mono uses 1 channel, not 2.' },
+          { id: 't6', value: 8, label: '8', sublabel: '' },
+          { id: 't7', value: 1024, label: '1024', sublabel: '' },
+          { id: 't8', value: 1024, label: '1024', sublabel: '' }
+        ],
+        nudges: [
+          '<strong>Time Trap:</strong> 5 minutes × 60 seconds = <strong>300 seconds</strong>.',
+          '<strong>Values:</strong> Top = <span class="font-mono">22050 × 16 × 300</span>. Bottom = <span class="font-mono">8 × 1024 × 1024</span>.',
+          '<strong>Auto-fill:</strong> Let’s place one token for you.'
+        ]
+      },
+      {
+        id: 's4-q3',
+        stage: 4,
+        mediaType: 'image',
+        targetUnit: 'KiB',
+        prompt: 'A custom UI banner is <strong>1024 × 256 pixels</strong> and supports <strong>64 colours</strong>. Phrase the calculation for its size in <strong>Kibibytes (KiB)</strong>.',
+        numExpected: [1024, 256, 6],
+        denExpected: [8, 1024],
+        tokens: [
+          { id: 't1', value: 1024, label: '1024', sublabel: '' },
+          { id: 't2', value: 256, label: '256', sublabel: '' },
+          { id: 't3', value: 6, label: '6', sublabel: '' },
+          { id: 't4', value: 64, label: '64', sublabel: '', isDistractor: true, distractorReason: '64 is the number of colours. Since 2⁶ = 64, colour depth is 6 bits.' },
+          { id: 't5', value: 8, label: '8', sublabel: '' },
+          { id: 't6', value: 1024, label: '1024', sublabel: '' }
+        ],
+        nudges: [
+          '<strong>Power of 2:</strong> <span class="font-mono">2⁶ = 64</span>, so 64 colours requires <strong>6 bits</strong> per pixel.',
+          '<strong>Notice:</strong> One <span class="font-mono">1024</span> is the image width (top), and another <span class="font-mono">1024</span> converts Bytes to KiB (bottom)!',
+          '<strong>Auto-fill:</strong> Let’s place one token for you.'
+        ]
+      }
+    ];
+
+    // =========================================================================
+    // 2. APPLICATION STATE
+    // =========================================================================
+    const state = {
+      mode: 'explorer', // 'explorer' | 'stage' | 'complete'
+      currentStage: 1,
+      currentQuestionIndex: 0, // Index within QUESTIONS (0..11)
+      completedIds: new Set(),
+      nudgeLevel: 0, // 0..3
+      stage4InputMode: 'tokens', // 'tokens' | 'text'
+
+      // Slot-based placement (Stages 1 & 2): arrays of tokenIds or null
+      numSlotTokens: [],
+      denSlotTokens: [],
+
+      // Open tray placement (Stages 3 & 4): arrays of tokenIds
+      numOpenTokens: [],
+      denOpenTokens: [],
+
+      // Drag tracking
+      draggedTokenId: null,
+
+      // Explorer Sandbox State
+      explorer: {
+        type: 'image',
+        width: 800,
+        height: 600,
+        depth: 24,
+        rate: 44100,
+        res: 16,
+        duration: 30,
+        channels: 2,
+        unit: 'KiB'
+      }
+    };
+
+    const STAGE_META = {
+      1: {
+        title: 'Full Scaffolding: Labelled Slots',
+        desc: 'Each slot tells you exactly what part of the formula belongs there. Click or drag tokens to fill the fraction.'
+      },
+      2: {
+        title: 'Medium Scaffolding: Unlabelled Slots',
+        desc: 'Slot labels are removed! Watch out for minutes → seconds and number of colours → bit depth.'
+      },
+      3: {
+        title: 'Low Scaffolding: Open Fraction Builder',
+        desc: 'Slot counts are hidden. Decide how many values multiply on top and how many divide on the bottom.'
+      },
+      4: {
+        title: 'Independent Mastery: Exam Mode',
+        desc: 'Build the complete expression unassisted — use tokens or switch to free-text typing.'
+      }
+    };
+
+    // =========================================================================
+    // 3. INITIALISATION & THEME
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      // Respect system dark mode preference initially while keeping calm contrast
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+        document.getElementById('theme-icon').textContent = '☀️';
+      }
+      updateExplorer();
+      switchMode('explorer');
+    });
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.classList.toggle('dark');
+      document.getElementById('theme-icon').textContent = isDark ? '☀️' : '🌙';
+    }
+
+    function toggleTheoryDrawer() {
+      const drawer = document.getElementById('theory-drawer');
+      drawer.classList.toggle('hidden');
+    }
+
+    // =========================================================================
+    // 4. STORAGE THEORY EXPLORER (CONCEPTUAL SANDBOX)
+    // =========================================================================
+    function setExplorerType(type) {
+      state.explorer.type = type;
+      const imgBtn = document.getElementById('exp-type-image');
+      const sndBtn = document.getElementById('exp-type-sound');
+      const imgCtrl = document.getElementById('exp-controls-image');
+      const sndCtrl = document.getElementById('exp-controls-sound');
+
+      if (type === 'image') {
+        imgBtn.className = 'px-3.5 py-1.5 rounded-lg text-sm font-semibold transition bg-white dark:bg-slate-900 text-sky-700 dark:text-sky-300 shadow-sm';
+        sndBtn.className = 'px-3.5 py-1.5 rounded-lg text-sm font-semibold transition text-slate-600 dark:text-slate-400';
+        imgCtrl.classList.remove('hidden');
+        sndCtrl.classList.add('hidden');
+      } else {
+        sndBtn.className = 'px-3.5 py-1.5 rounded-lg text-sm font-semibold transition bg-white dark:bg-slate-900 text-indigo-700 dark:text-indigo-300 shadow-sm';
+        imgBtn.className = 'px-3.5 py-1.5 rounded-lg text-sm font-semibold transition text-slate-600 dark:text-slate-400';
+        sndCtrl.classList.remove('hidden');
+        imgCtrl.classList.add('hidden');
+      }
+      updateExplorer();
+    }
+
+    function setExpDepth(val) { state.explorer.depth = val; updateExplorer(); }
+    function setExpRate(val) { state.explorer.rate = val; updateExplorer(); }
+    function setExpRes(val) { state.explorer.res = val; updateExplorer(); }
+    function setExpChannels(val) { state.explorer.channels = val; updateExplorer(); }
+    function setExpUnit(unit) { state.explorer.unit = unit; updateExplorer(); }
+
+    function updateExplorer() {
+      const exp = state.explorer;
+      exp.width = parseInt(document.getElementById('exp-width').value, 10);
+      exp.height = parseInt(document.getElementById('exp-height').value, 10);
+      exp.duration = parseInt(document.getElementById('exp-duration').value, 10);
+
+      document.getElementById('exp-width-val').textContent = `${exp.width} px`;
+      document.getElementById('exp-height-val').textContent = `${exp.height} px`;
+      document.getElementById('exp-dur-val').textContent = `${exp.duration} s`;
+
+      // Style active selector pills in explorer
+      document.querySelectorAll('.exp-depth-btn').forEach(btn => {
+        const active = parseInt(btn.dataset.depth, 10) === exp.depth;
+        btn.className = `exp-depth-btn py-2 rounded-lg font-mono text-xs font-bold border transition ${
+          active ? 'bg-sky-600 text-white border-sky-600' : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+        }`;
+      });
+
+      document.querySelectorAll('.exp-rate-btn').forEach(btn => {
+        const active = parseInt(btn.dataset.rate, 10) === exp.rate;
+        btn.className = `exp-rate-btn py-2 rounded-lg font-mono text-xs font-bold border transition ${
+          active ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+        }`;
+      });
+
+      document.querySelectorAll('.exp-res-btn').forEach(btn => {
+        const active = parseInt(btn.dataset.res, 10) === exp.res;
+        btn.className = `exp-res-btn py-2 rounded-lg font-mono text-xs font-bold border transition ${
+          active ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+        }`;
+      });
+
+      document.querySelectorAll('.exp-ch-btn').forEach(btn => {
+        const active = parseInt(btn.dataset.ch, 10) === exp.channels;
+        btn.className = `exp-ch-btn py-1.5 rounded-lg text-xs font-bold border transition ${
+          active ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+        }`;
+      });
+
+      document.querySelectorAll('.exp-unit-btn').forEach(btn => {
+        const active = btn.dataset.unit === exp.unit;
+        btn.className = `exp-unit-btn py-2 rounded-lg text-xs font-bold border transition ${
+          active ? 'bg-amber-600 text-white border-amber-600' : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+        }`;
+      });
+
+      // Build numerator items
+      let numItems = [];
+      let totalBits = 0;
+      if (exp.type === 'image') {
+        numItems = [
+          { val: exp.width, desc: 'Width' },
+          { val: exp.height, desc: 'Height' },
+          { val: exp.depth, desc: 'Bit Depth' }
+        ];
+        totalBits = exp.width * exp.height * exp.depth;
+        document.getElementById('exp-theory-tag').textContent = 'Width × Height × Colour Depth';
+      } else {
+        numItems = [
+          { val: exp.rate, desc: 'Sample Rate' },
+          { val: exp.res, desc: 'Resolution' },
+          { val: exp.duration, desc: 'Seconds' }
+        ];
+        if (exp.channels === 2) {
+          numItems.push({ val: 2, desc: 'Stereo (2 ch)' });
+        }
+        totalBits = exp.rate * exp.res * exp.duration * exp.channels;
+        document.getElementById('exp-theory-tag').textContent = exp.channels === 2
+          ? 'Rate × Resolution × Seconds × 2 Channels'
+          : 'Rate × Resolution × Seconds (Mono)';
+      }
+
+      // Build denominator items
+      let denItems = [{ val: 8, desc: 'Bits → Bytes' }];
+      let divisor = 8;
+      let unitExplain = 'Dividing by <strong>8</strong> converts raw bits into <strong>Bytes</strong>.';
+
+      if (exp.unit === 'KiB') {
+        denItems.push({ val: 1024, desc: 'Bytes → KiB' });
+        divisor = 8 * 1024;
+        unitExplain = 'Dividing by <strong>8</strong> gives Bytes, and dividing by <strong>1024</strong> converts Bytes into <strong>Kibibytes (KiB)</strong>.';
+      } else if (exp.unit === 'MiB') {
+        denItems.push({ val: 1024, desc: 'Bytes → KiB' });
+        denItems.push({ val: 1024, desc: 'KiB → MiB' });
+        divisor = 8 * 1024 * 1024;
+        unitExplain = 'Dividing by <strong>8</strong> gives Bytes, the first <strong>1024</strong> gives KiB, and the second <strong>1024</strong> gives <strong>Mebibytes (MiB)</strong>.';
+      }
+
+      // Render Numerator Pills
+      const numContainer = document.getElementById('exp-numerator-pills');
+      numContainer.innerHTML = numItems.map((item, idx) => `
+        ${idx > 0 ? '<span class="font-mono font-bold text-slate-400">×</span>' : ''}
+        <div class="px-3.5 py-2 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800 text-center">
+          <div class="font-mono font-bold text-base text-sky-900 dark:text-sky-200">${item.val}</div>
+          <div class="text-[11px] font-medium text-sky-700 dark:text-sky-400">${item.desc}</div>
+        </div>
+      `).join('');
+
+      // Render Denominator Pills
+      const denContainer = document.getElementById('exp-denominator-pills');
+      denContainer.innerHTML = denItems.map((item, idx) => `
+        ${idx > 0 ? '<span class="font-mono font-bold text-slate-400">×</span>' : ''}
+        <div class="px-3.5 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-center">
+          <div class="font-mono font-bold text-base text-amber-900 dark:text-amber-200">${item.val}</div>
+          <div class="text-[11px] font-medium text-amber-700 dark:text-amber-400">${item.desc}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('exp-explanation').innerHTML = `
+        <p><strong>Why this fraction works:</strong> The top line multiplies everything together to get <strong>${totalBits.toLocaleString()} total bits</strong>. ${unitExplain}</p>
+      `;
+
+      const result = totalBits / divisor;
+      document.getElementById('exp-result-value').textContent =
+        `${result.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${exp.unit}`;
+    }
+
+    // =========================================================================
+    // 5. NAVIGATION & SCAFFOLDING STAGE MANAGEMENT
+    // =========================================================================
+    function switchMode(mode, stageNum = 1) {
+      state.mode = mode;
+
+      // Update top stage navigation tabs
+      document.querySelectorAll('.stage-tab').forEach(tab => {
+        tab.className = 'stage-tab px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-left sm:text-center transition flex flex-col sm:items-center justify-center border bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800';
+      });
+
+      const activeTab = mode === 'explorer'
+        ? document.getElementById('tab-explorer')
+        : document.getElementById(`tab-stage-${stageNum}`);
+
+      if (activeTab) {
+        activeTab.className = 'stage-tab px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-left sm:text-center transition flex flex-col sm:items-center justify-center border bg-sky-600 text-white border-sky-600 shadow-sm';
+      }
+
+      document.getElementById('explorer-view').classList.toggle('hidden', mode !== 'explorer');
+      document.getElementById('practice-view').classList.toggle('hidden', mode !== 'stage');
+      document.getElementById('completion-view').classList.toggle('hidden', mode !== 'complete');
+
+      if (mode === 'stage') {
+        state.currentStage = stageNum;
+        // Jump to first question of that stage
+        const firstIdx = QUESTIONS.findIndex(q => q.stage === stageNum);
+        loadQuestion(firstIdx >= 0 ? firstIdx : 0);
+      }
+    }
+
+    function loadQuestion(index) {
+      state.currentQuestionIndex = index;
+      const q = QUESTIONS[index];
+      state.currentStage = q.stage;
+      state.nudgeLevel = 0;
+
+      // Update active stage tab highlight
+      document.querySelectorAll('.stage-tab').forEach(tab => {
+        tab.className = 'stage-tab px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-left sm:text-center transition flex flex-col sm:items-center justify-center border bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800';
+      });
+      const activeTab = document.getElementById(`tab-stage-${q.stage}`);
+      if (activeTab) {
+        activeTab.className = 'stage-tab px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-left sm:text-center transition flex flex-col sm:items-center justify-center border bg-sky-600 text-white border-sky-600 shadow-sm';
+      }
+
+      // Reset workspace placements
+      if (q.stage <= 2) {
+        state.numSlotTokens = new Array(q.numSlots.length).fill(null);
+        state.denSlotTokens = new Array(q.denSlots.length).fill(null);
+      } else {
+        state.numOpenTokens = [];
+        state.denOpenTokens = [];
+      }
+
+      // Stage Header Info
+      document.getElementById('stage-badge').textContent = `Stage ${q.stage} of 4`;
+      document.getElementById('stage-title').textContent = STAGE_META[q.stage].title;
+      document.getElementById('stage-desc').textContent = STAGE_META[q.stage].desc;
+
+      // Question Badges & Prompt
+      const mediaBadge = document.getElementById('q-media-badge');
+      if (q.mediaType === 'image') {
+        mediaBadge.textContent = '🖼️ Bitmap Image';
+        mediaBadge.className = 'px-3 py-1 rounded-lg text-xs font-bold bg-sky-100 text-sky-800 dark:bg-sky-900/60 dark:text-sky-200';
+      } else {
+        mediaBadge.textContent = '🔊 Digital Sound';
+        mediaBadge.className = 'px-3 py-1 rounded-lg text-xs font-bold bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-200';
+      }
+
+      document.getElementById('q-unit-badge').textContent = `Target: ${q.targetUnit === 'KiB' ? 'Kibibytes (KiB)' : 'Mebibytes (MiB)'}`;
+      document.getElementById('q-prompt').innerHTML = q.prompt;
+
+      // Scaffolding fading cues on Numerator / Denominator headers
+      document.getElementById('num-hint-tag').textContent = q.stage === 1
+        ? (q.mediaType === 'image' ? 'Width × Height × Colour Depth' : 'Sample Rate × Resolution × Seconds')
+        : (q.stage === 2 ? 'Fill all numerator slots' : 'Multiply total bits');
+
+      document.getElementById('den-hint-tag').textContent = q.stage <= 2
+        ? `Convert Bits → ${q.targetUnit}`
+        : 'Divide to convert units';
+
+      // Stage 4 Free-Text Toggle visibility
+      const s4Toggle = document.getElementById('stage4-input-toggle');
+      if (q.stage === 4) {
+        s4Toggle.classList.remove('hidden');
+        setStage4InputMode(state.stage4InputMode);
+      } else {
+        s4Toggle.classList.add('hidden');
+        document.getElementById('fraction-builder-container').classList.remove('hidden');
+        document.getElementById('token-bank-section').classList.remove('hidden');
+        document.getElementById('freetext-builder-container').classList.add('hidden');
+      }
+
+      // Reset Nudge & Feedback UI
+      document.getElementById('nudge-btn-label').textContent = 'Need a Nudge? (0/3)';
+      document.getElementById('nudge-box').classList.add('hidden');
+      document.getElementById('nudge-box').innerHTML = '';
+      document.getElementById('feedback-panel').classList.add('hidden');
+      document.getElementById('next-btn').classList.add('hidden');
+      document.getElementById('check-btn').classList.remove('hidden');
+      document.getElementById('freetext-input').value = '';
+
+      renderQuestionDots();
+      renderWorkspace();
+    }
+
+    function setStage4InputMode(mode) {
+      state.stage4InputMode = mode;
+      const btnTokens = document.getElementById('btn-input-tokens');
+      const btnText = document.getElementById('btn-input-text');
+
+      if (mode === 'tokens') {
+        btnTokens.className = 'px-3 py-1 rounded-lg text-xs font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm';
+        btnText.className = 'px-3 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400';
+        document.getElementById('fraction-builder-container').classList.remove('hidden');
+        document.getElementById('token-bank-section').classList.remove('hidden');
+        document.getElementById('freetext-builder-container').classList.add('hidden');
+      } else {
+        btnText.className = 'px-3 py-1 rounded-lg text-xs font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm';
+        btnTokens.className = 'px-3 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400';
+        document.getElementById('fraction-builder-container').classList.add('hidden');
+        document.getElementById('token-bank-section').classList.add('hidden');
+        document.getElementById('freetext-builder-container').classList.remove('hidden');
+      }
+    }
+
+    function renderQuestionDots() {
+      const q = QUESTIONS[state.currentQuestionIndex];
+      const stageQuestions = QUESTIONS.map((item, idx) => ({ ...item, globalIdx: idx }))
+        .filter(item => item.stage === q.stage);
+
+      const dotsContainer = document.getElementById('question-dots');
+      dotsContainer.innerHTML = stageQuestions.map((item, i) => {
+        const isCurrent = item.globalIdx === state.currentQuestionIndex;
+        const isDone = state.completedIds.has(item.id);
+        let style = 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300';
+        if (isDone) style = 'bg-emerald-500 text-white';
+        if (isCurrent) style += ' ring-2 ring-sky-500 ring-offset-2 dark:ring-offset-slate-900 font-bold';
+
+        return `
+          <button onclick="loadQuestion(${item.globalIdx})"
+            class="w-7 h-7 rounded-lg text-xs font-semibold transition ${style}">
+            ${i + 1}
+          </button>
+        `;
+      }).join('');
+
+      // Overall progress bar
+      const pct = Math.round((state.completedIds.size / QUESTIONS.length) * 100);
+      document.getElementById('overall-progress-bar').style.width = `${pct}%`;
+    }
+
+    // =========================================================================
+    // 6. RENDERING SLOTS, OPEN TRAYS, AND WORD BANK TOKENS
+    // =========================================================================
+    function getUsedTokenIds() {
+      const q = QUESTIONS[state.currentQuestionIndex];
+      if (q.stage <= 2) {
+        return new Set([...state.numSlotTokens, ...state.denSlotTokens].filter(Boolean));
+      } else {
+        return new Set([...state.numOpenTokens, ...state.denOpenTokens]);
+      }
+    }
+
+    function findTokenById(tokenId) {
+      const q = QUESTIONS[state.currentQuestionIndex];
+      return q.tokens.find(t => t.id === tokenId);
+    }
+
+    function renderWorkspace() {
+      const q = QUESTIONS[state.currentQuestionIndex];
+      const numEl = document.getElementById('numerator-slots');
+      const denEl = document.getElementById('denominator-slots');
+
+      if (q.stage <= 2) {
+        // STAGE 1 (Labelled Slots) & STAGE 2 (Unlabelled Slots)
+        numEl.innerHTML = q.numSlots.map((slot, idx) => {
+          const placedId = state.numSlotTokens[idx];
+          const token = placedId ? findTokenById(placedId) : null;
+          const sep = idx > 0 ? '<span class="font-mono font-bold text-lg text-sky-700 dark:text-sky-400">×</span>' : '';
+
+          if (token) {
+            return `${sep}
+              <button onclick="removeSlotToken('num', ${idx})" title="Click to remove"
+                class="token-pill px-4 py-2.5 rounded-xl bg-sky-600 text-white font-mono font-bold text-base shadow-sm border border-sky-700 flex items-center gap-2">
+                <span>${token.label}</span>
+                <span class="text-xs opacity-80">✕</span>
+              </button>`;
+          } else {
+            return `${sep}
+              <div ondragover="event.preventDefault()" ondrop="handleSlotDrop(event, 'num', ${idx})"
+                class="min-w-[115px] px-3.5 py-2.5 rounded-xl border-2 border-dashed border-sky-300 dark:border-sky-700 bg-white/80 dark:bg-slate-900/80 text-center">
+                <div class="text-xs font-semibold text-sky-800 dark:text-sky-300">
+                  ${q.stage === 1 ? slot.label : `Value ${idx + 1}`}
+                </div>
+              </div>`;
+          }
+        }).join('');
+
+        denEl.innerHTML = q.denSlots.map((slot, idx) => {
+          const placedId = state.denSlotTokens[idx];
+          const token = placedId ? findTokenById(placedId) : null;
+          const sep = idx > 0 ? '<span class="font-mono font-bold text-lg text-amber-700 dark:text-amber-400">×</span>' : '';
+
+          if (token) {
+            return `${sep}
+              <button onclick="removeSlotToken('den', ${idx})" title="Click to remove"
+                class="token-pill px-4 py-2.5 rounded-xl bg-amber-600 text-white font-mono font-bold text-base shadow-sm border border-amber-700 flex items-center gap-2">
+                <span>${token.label}</span>
+                <span class="text-xs opacity-80">✕</span>
+              </button>`;
+          } else {
+            return `${sep}
+              <div ondragover="event.preventDefault()" ondrop="handleSlotDrop(event, 'den', ${idx})"
+                class="min-w-[115px] px-3.5 py-2.5 rounded-xl border-2 border-dashed border-amber-300 dark:border-amber-700 bg-white/80 dark:bg-slate-900/80 text-center">
+                <div class="text-xs font-semibold text-amber-800 dark:text-amber-300">
+                  ${q.stage === 1 ? slot.label : `Unit ${idx + 1}`}
+                </div>
+              </div>`;
+          }
+        }).join('');
+
+      } else {
+        // STAGE 3 & STAGE 4: Open Fraction Trays
+        if (state.numOpenTokens.length === 0) {
+          numEl.innerHTML = `<span class="text-xs text-sky-700/70 dark:text-sky-300/60 italic">Click or drag numerator values here...</span>`;
+        } else {
+          numEl.innerHTML = state.numOpenTokens.map((tid, idx) => {
+            const token = findTokenById(tid);
+            const sep = idx > 0 ? '<span class="font-mono font-bold text-lg text-sky-700 dark:text-sky-400">×</span>' : '';
+            return `${sep}
+              <button onclick="removeOpenToken('num', ${idx})" title="Click to remove"
+                class="token-pill px-4 py-2.5 rounded-xl bg-sky-600 text-white font-mono font-bold text-base shadow-sm border border-sky-700 flex items-center gap-2">
+                <span>${token.label}</span>
+                <span class="text-xs opacity-80">✕</span>
+              </button>`;
+          }).join('');
+        }
+
+        if (state.denOpenTokens.length === 0) {
+          denEl.innerHTML = `<span class="text-xs text-amber-700/70 dark:text-amber-300/60 italic">Click or drag denominator conversions here...</span>`;
+        } else {
+          denEl.innerHTML = state.denOpenTokens.map((tid, idx) => {
+            const token = findTokenById(tid);
+            const sep = idx > 0 ? '<span class="font-mono font-bold text-lg text-amber-700 dark:text-amber-400">×</span>' : '';
+            return `${sep}
+              <button onclick="removeOpenToken('den', ${idx})" title="Click to remove"
+                class="token-pill px-4 py-2.5 rounded-xl bg-amber-600 text-white font-mono font-bold text-base shadow-sm border border-amber-700 flex items-center gap-2">
+                <span>${token.label}</span>
+                <span class="text-xs opacity-80">✕</span>
+              </button>`;
+          }).join('');
+        }
+      }
+
+      // Render Token Bank
+      const used = getUsedTokenIds();
+      const bankEl = document.getElementById('token-bank');
+      bankEl.innerHTML = q.tokens.map(token => {
+        const isUsed = used.has(token.id);
+        return `
+          <div class="inline-flex items-stretch rounded-xl border ${
+            isUsed
+              ? 'opacity-40 bg-slate-100 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800'
+              : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 shadow-sm'
+          }">
+            <button
+              ${isUsed ? 'disabled' : ''}
+              draggable="${!isUsed}"
+              ondragstart="handleDragStart(event, '${token.id}')"
+              onclick="smartPlaceToken('${token.id}')"
+              class="token-pill px-3.5 py-2 text-left rounded-l-xl flex flex-col justify-center">
+              <span class="font-mono font-bold text-sm sm:text-base text-slate-900 dark:text-white">${token.label}</span>
+              ${token.sublabel && q.stage <= 2 ? `<span class="text-[11px] text-slate-500 dark:text-slate-400">${token.sublabel}</span>` : ''}
+            </button>
+            ${!isUsed ? `
+              <div class="flex flex-col border-l border-slate-200 dark:border-slate-700 text-[10px] font-bold">
+                <button onclick="placeTokenZone('${token.id}', 'num')" title="Add to Numerator (Top)"
+                  class="flex-1 px-2 hover:bg-sky-100 dark:hover:bg-sky-900/50 text-sky-700 dark:text-sky-300 rounded-tr-xl transition">
+                  ▲ Top
+                </button>
+                <button onclick="placeTokenZone('${token.id}', 'den')" title="Add to Denominator (Bottom)"
+                  class="flex-1 px-2 hover:bg-amber-100 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-300 border-t border-slate-200 dark:border-slate-700 rounded-br-xl transition">
+                  ▼ Bot
+                </button>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // =========================================================================
+    // 7. TOKEN INTERACTION (CLICK-TO-PLACE & DRAG-AND-DROP)
+    // =========================================================================
+    function smartPlaceToken(tokenId) {
+      const q = QUESTIONS[state.currentQuestionIndex];
+      const token = findTokenById(tokenId);
+      if (!token) return;
+
+      if (q.stage <= 2) {
+        // Fill first empty numerator slot; if numerator full, fill first empty denominator slot
+        const emptyNumIdx = state.numSlotTokens.indexOf(null);
+        const emptyDenIdx = state.denSlotTokens.indexOf(null);
+
+        // If token is clearly a unit constant (8 or 1024) and denominator has space, prefer denominator unless numerator needs 8
+        const numNeeds8 = q.numSlots.some((s, i) => s.expected === 8 && state.numSlotTokens[i] === null);
+        if ((token.value === 1024 || (token.value === 8 && !numNeeds8)) && emptyDenIdx !== -1) {
+          state.denSlotTokens[emptyDenIdx] = tokenId;
+        } else if (emptyNumIdx !== -1) {
+          state.numSlotTokens[emptyNumIdx] = tokenId;
+        } else if (emptyDenIdx !== -1) {
+          state.denSlotTokens[emptyDenIdx] = tokenId;
+        }
+      } else {
+        // Open trays: send 1024 to denominator by default, others to numerator (user can also use ▲ Top / ▼ Bot buttons or drag)
+        if (token.value === 1024) {
+          state.denOpenTokens.push(tokenId);
+        } else {
+          state.numOpenTokens.push(tokenId);
+        }
+      }
+      hideFeedback();
+      renderWorkspace();
+    }
+
+    function placeTokenZone(tokenId, zone) {
+      const q = QUESTIONS[state.currentQuestionIndex];
+      if (q.stage <= 2) {
+        if (zone === 'num') {
+          const idx = state.numSlotTokens.indexOf(null);
+          if (idx !== -1) state.numSlotTokens[idx] = tokenId;
+        } else {
+          const idx = state.denSlotTokens.indexOf(null);
+          if (idx !== -1) state.denSlotTokens[idx] = tokenId;
+        }
+      } else {
+        if (zone === 'num') state.numOpenTokens.push(tokenId);
+        else state.denOpenTokens.push(tokenId);
+      }
+      hideFeedback();
+      renderWorkspace();
+    }
+
+    function removeSlotToken(zone, slotIdx) {
+      if (zone === 'num') state.numSlotTokens[slotIdx] = null;
+      else state.denSlotTokens[slotIdx] = null;
+      hideFeedback();
+      renderWorkspace();
+    }
+
+    function removeOpenToken(zone, idx) {
+      if (zone === 'num') state.numOpenTokens.splice(idx, 1);
+      else state.denOpenTokens.splice(idx, 1);
+      hideFeedback();
+      renderWorkspace();
+    }
+
+    // Drag and drop handlers
+    function handleDragStart(event, tokenId) {
+      state.draggedTokenId = tokenId;
+      event.dataTransfer.setData('text/plain', tokenId);
+    }
+
+    function handleDragOver(event, zone) {
+      event.preventDefault();
+      document.getElementById(zone === 'num' ? 'numerator-zone' : 'denominator-zone').classList.add('dropzone-active');
+    }
+
+    function handleDragLeave(event, zone) {
+      document.getElementById(zone === 'num' ? 'numerator-zone' : 'denominator-zone').classList.remove('dropzone-active');
+    }
+
+    function handleDrop(event, zone) {
+      event.preventDefault();
+      document.getElementById('numerator-zone').classList.remove('dropzone-active');
+      document.getElementById('denominator-zone').classList.remove('dropzone-active');
+      const tokenId = event.dataTransfer.getData('text/plain') || state.draggedTokenId;
+      if (tokenId) {
+        placeTokenZone(tokenId, zone);
+      }
+    }
+
+    function handleSlotDrop(event, zone, slotIdx) {
+      event.preventDefault();
+      event.stopPropagation();
+      document.getElementById('numerator-zone').classList.remove('dropzone-active');
+      document.getElementById('denominator-zone').classList.remove('dropzone-active');
+      const tokenId = event.dataTransfer.getData('text/plain') || state.draggedTokenId;
+      if (!tokenId) return;
+
+      if (zone === 'num') state.numSlotTokens[slotIdx] = tokenId;
+      else state.denSlotTokens[slotIdx] = tokenId;
+      hideFeedback();
+      renderWorkspace();
+    }
+
+    function resetCurrentQuestion() {
+      loadQuestion(state.currentQuestionIndex);
+    }
+
+    // =========================================================================
+    // 8. PROGRESSIVE NUDGE SYSTEM (3 STEPS)
+    // =========================================================================
+    function triggerNudge() {
+      const q = QUESTIONS[state.currentQuestionIndex];
+      if (state.nudgeLevel >= 3) return;
+
+      state.nudgeLevel++;
+      document.getElementById('nudge-btn-label').textContent = `Need a Nudge? (${state.nudgeLevel}/3)`;
+
+      const box = document.getElementById('nudge-box');
+      box.classList.remove('hidden');
+
+      const p = document.createElement('p');
+      p.innerHTML = `<span class="font-bold mr-1">Hint ${state.nudgeLevel}:</span> ${q.nudges[state.nudgeLevel - 1]}`;
+      box.appendChild(p);
+
+      // Nudge 3 automatically places one missing piece correctly
+      if (state.nudgeLevel === 3) {
+        autoFillOnePiece(q);
+      }
+    }
+
+    function autoFillOnePiece(q) {
+      if (q.stage === 4 && state.stage4InputMode === 'text') {
+        document.getElementById('freetext-input').value =
+          `(${q.numExpected.join(' * ')}) / (${q.denExpected.join(' * ')})`;
+        return;
+      }
+
+      const used = getUsedTokenIds();
+      if (q.stage <= 2) {
+        // Find first incorrect or empty numerator slot
+        for (let i = 0; i < q.numSlots.length; i++) {
+          const curId = state.numSlotTokens[i];
+          const curTok = curId ? findTokenById(curId) : null;
+          if (!curTok || curTok.value !== q.numSlots[i].expected) {
+            const match = q.tokens.find(t => t.value === q.numSlots[i].expected && !t.isDistractor && !used.has(t.id));
+            if (match) {
+              state.numSlotTokens[i] = match.id;
+              renderWorkspace();
+              return;
+            }
+          }
+        }
+        // Otherwise fix first denominator slot
+        for (let i = 0; i < q.denSlots.length; i++) {
+          const curId = state.denSlotTokens[i];
+          const curTok = curId ? findTokenById(curId) : null;
+          if (!curTok || curTok.value !== q.denSlots[i].expected) {
+            const match = q.tokens.find(t => t.value === q.denSlots[i].expected && !t.isDistractor && !used.has(t.id));
+            if (match) {
+              state.denSlotTokens[i] = match.id;
+              renderWorkspace();
+              return;
+            }
+          }
+        }
+      } else {
+        // Open trays: find one expected numerator value not yet present
+        const currentNumVals = state.numOpenTokens.map(id => findTokenById(id).value);
+        for (const reqVal of q.numExpected) {
+          if (!currentNumVals.includes(reqVal)) {
+            const match = q.tokens.find(t => t.value === reqVal && !t.isDistractor && !used.has(t.id));
+            if (match) {
+              state.numOpenTokens.push(match.id);
+              renderWorkspace();
+              return;
+            }
+          }
+        }
+      }
+    }
+
+    // =========================================================================
+    // 9. COMMUTATIVE EXPRESSION VERIFICATION & DIAGNOSTIC FEEDBACK
+    // =========================================================================
+    function arraysMatchMultiset(arrA, arrB) {
+      if (arrA.length !== arrB.length) return false;
+      const sortedA = [...arrA].sort((a, b) => a - b);
+      const sortedB = [...arrB].sort((a, b) => a - b);
+      return sortedA.every((val, idx) => val === sortedB[idx]);
+    }
+
+    /**
+     * Parses free-text expressions in Stage 4 such as:
+     * "(3840 * 2160 * 16) / (8 * 1024 * 1024)" or "3840 x 2160 x 16 / 8 / 1024 / 1024"
+     */
+    function parseFreeTextExpression(raw) {
+      const cleaned = raw.trim().replace(/,/g, '').replace(/[×xX]/g, '*').replace(/÷/g, '/');
+      if (!cleaned) return null;
+
+      // Case A: Standard "(a * b * c) / (d * e)" or "a * b * c / (d * e)"
+      if (cleaned.includes('/')) {
+        const parts = cleaned.split('/');
+        // If written as "a * b * c / 8 / 1024 / 1024", first part is numerator, remaining parts are denominator factors
+        if (parts.length > 2) {
+          const numNums = parts[0].replace(/[()]/g, '').split('*').map(s => Number(s.trim())).filter(n => !isNaN(n) && n > 0);
+          const denNums = parts.slice(1).join('*').replace(/[()]/g, '').split('*').map(s => Number(s.trim())).filter(n => !isNaN(n) && n > 0);
+          if (numNums.length && denNums.length) return { num: numNums, den: denNums };
+        } else if (parts.length === 2) {
+          const numStr = parts[0].replace(/[()]/g, '').trim();
+          const denStr = parts[1].replace(/[()]/g, '').trim();
+          const numNums = numStr.split('*').map(s => Number(s.trim())).filter(n => !isNaN(n) && n > 0);
+          const denNums = denStr.split('*').map(s => Number(s.trim())).filter(n => !isNaN(n) && n > 0);
+          if (numNums.length && denNums.length) return { num: numNums, den: denNums };
+        }
+      }
+      return null;
+    }
+
+    function checkAnswer() {
+      const q = QUESTIONS[state.currentQuestionIndex];
+      let userNum = [];
+      let userDen = [];
+      let placedTokens = [];
+
+      if (q.stage === 4 && state.stage4InputMode === 'text') {
+        const raw = document.getElementById('freetext-input').value;
+        const parsed = parseFreeTextExpression(raw);
+        if (!parsed) {
+          showFeedback(false, 'Format Check', [
+            'Write your calculation as a fraction with a slash <code class="font-mono">/</code>, for example: <code class="font-mono">(3840 * 2160 * 16) / (8 * 1024 * 1024)</code>.'
+          ]);
+          return;
+        }
+        userNum = parsed.num;
+        userDen = parsed.den;
+      } else if (q.stage <= 2) {
+        if (state.numSlotTokens.includes(null) || state.denSlotTokens.includes(null)) {
+          showFeedback(false, 'Almost Ready!', [
+            'Fill every empty slot in both the Numerator (top) and Denominator (bottom) before checking.'
+          ]);
+          return;
+        }
+        placedTokens = [...state.numSlotTokens, ...state.denSlotTokens].map(findTokenById);
+        userNum = state.numSlotTokens.map(id => findTokenById(id).value);
+        userDen = state.denSlotTokens.map(id => findTokenById(id).value);
+      } else {
+        if (state.numOpenTokens.length === 0 || state.denOpenTokens.length === 0) {
+          showFeedback(false, 'Incomplete Fraction', [
+            'Make sure you have placed values in both the <strong>Numerator (top)</strong> and the <strong>Denominator (bottom)</strong>.'
+          ]);
+          return;
+        }
+        placedTokens = [...state.numOpenTokens, ...state.denOpenTokens].map(findTokenById);
+        userNum = state.numOpenTokens.map(id => findTokenById(id).value);
+        userDen = state.denOpenTokens.map(id => findTokenById(id).value);
+      }
+
+      const numOk = arraysMatchMultiset(userNum, q.numExpected);
+      const denOk = arraysMatchMultiset(userDen, q.denExpected);
+
+      if (numOk && denOk) {
+        // Calculate final value so students get the satisfying payoff without manual maths
+        const totalBits = q.numExpected.reduce((acc, v) => acc * v, 1);
+        const totalDiv = q.denExpected.reduce((acc, v) => acc * v, 1);
+        const finalVal = totalBits / totalDiv;
+
+        state.completedIds.add(q.id);
+        renderQuestionDots();
+
+        showFeedback(true, 'Spot on! Expression Phrased Correctly', [
+          `Your fraction <span class="font-mono font-semibold">(${q.numExpected.join(' × ')}) ÷ (${q.denExpected.join(' × ')})</span> accurately models the storage theory.`,
+          `<strong>Calculator Payoff:</strong> ${totalBits.toLocaleString()} bits ÷ ${totalDiv.toLocaleString()} = <strong>${finalVal.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${q.targetUnit}</strong>.`
+        ]);
+
+        document.getElementById('check-btn').classList.add('hidden');
+        const nextBtn = document.getElementById('next-btn');
+        nextBtn.classList.remove('hidden');
+        document.getElementById('next-btn-text').textContent =
+          state.currentQuestionIndex === QUESTIONS.length - 1 ? 'Finish & View Summary' : 'Next Question';
+      } else {
+        // Generate targeted, supportive diagnostic feedback
+        const diagnostics = [];
+
+        // Check if any distractor tokens were used
+        placedTokens.forEach(tok => {
+          if (tok && tok.isDistractor && tok.distractorReason) {
+            diagnostics.push(`⚠️ <strong>Check ${tok.label}:</strong> ${tok.distractorReason}`);
+          }
+        });
+
+        if (numOk && !denOk) {
+          diagnostics.push('✅ <strong>Numerator (Top) is correct!</strong> You found the right total bits.');
+          diagnostics.push(`🔍 <strong>Check Denominator (Bottom):</strong> To convert bits to <strong>${q.targetUnit}</strong>, divide by ${q.targetUnit === 'KiB' ? '<span class="font-mono">8 × 1024</span>' : '<span class="font-mono">8 × 1024 × 1024</span>'}.`);
+        } else if (!numOk && denOk) {
+          diagnostics.push('✅ <strong>Denominator (Bottom) is correct!</strong> Your unit conversions are spot on.');
+          diagnostics.push(`🔍 <strong>Check Numerator (Top):</strong> Re-read the problem carefully to ensure you have the right ${q.mediaType === 'image' ? 'Width, Height, and Bit Depth' : 'Sample Rate, Bit Resolution, Seconds, and Channels'}.`);
+        } else if (diagnostics.length === 0) {
+          diagnostics.push('🔍 Check both parts of your fraction: make sure total bits are multiplied on top, and binary unit conversions (<span class="font-mono">8</span> and <span class="font-mono">1024</span>) are on the bottom.');
+        }
+
+        showFeedback(false, 'Not quite — let’s refine your expression', diagnostics);
+      }
+    }
+
+    function showFeedback(isSuccess, heading, lines) {
+      const panel = document.getElementById('feedback-panel');
+      panel.classList.remove('hidden');
+
+      if (isSuccess) {
+        panel.className = 'rounded-2xl p-4 sm:p-5 border-2 border-emerald-300 dark:border-emerald-700 bg-emerald-50/90 dark:bg-emerald-950/40 text-emerald-950 dark:text-emerald-100 text-sm space-y-2';
+      } else {
+        panel.className = 'rounded-2xl p-4 sm:p-5 border-2 border-amber-300 dark:border-amber-700 bg-amber-50/90 dark:bg-amber-950/40 text-amber-950 dark:text-amber-100 text-sm space-y-2';
+      }
+
+      panel.innerHTML = `
+        <div class="font-bold text-base flex items-center gap-2">
+          <span>${isSuccess ? '🎉' : '🧭'}</span>
+          <span>${heading}</span>
+        </div>
+        <ul class="space-y-1.5 pl-1">
+          ${lines.map(line => `<li>${line}</li>`).join('')}
+        </ul>
+      `;
+    }
+
+    function hideFeedback() {
+      document.getElementById('feedback-panel').classList.add('hidden');
+    }
+
+    function nextQuestion() {
+      if (state.currentQuestionIndex < QUESTIONS.length - 1) {
+        loadQuestion(state.currentQuestionIndex + 1);
+      } else {
+        switchMode('complete');
+      }
+    }
+
+    function restartAll() {
+      state.completedIds.clear();
+      switchMode('stage', 1);
+    }
+  </script>
+</body>
+</html>
